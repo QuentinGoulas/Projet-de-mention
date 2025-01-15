@@ -2,6 +2,7 @@ from mountain_car_problem import *
 
 with open('weights.pkl', 'rb') as f:
     w = pickle.load(f)
+    f.close()
     
 pos_values = np.linspace(pos_range[0], pos_range[1], num=50)
 vel_values = np.linspace(vel_range[0], vel_range[1], num=50)

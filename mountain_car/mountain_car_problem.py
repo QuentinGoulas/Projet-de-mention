@@ -41,8 +41,9 @@ def take_action(state, action):
 # print(state)
 
 def init_state():
-    # return a random state from the ranges
-    return [np.random.rand() * (pos_range[1] - pos_range[0]) + pos_range[0], np.random.rand() * (vel_range[1] - vel_range[0]) + vel_range[0]]
+    # return a random state from the ranges, and a null velocity
+    # return [np.random.rand() * (pos_range[1] - pos_range[0]) + pos_range[0], np.random.rand() * (vel_range[1] - vel_range[0]) + vel_range[0]]
+    return [np.random.rand() * (pos_range[1] - pos_range[0]) + pos_range[0], 0]
 
 def epsilon_greedy(q_values, epsilon=0.1):
     if np.random.rand() > epsilon:
@@ -53,7 +54,7 @@ def epsilon_greedy(q_values, epsilon=0.1):
 if __name__ == "__main__":
 
     I = 9000 # number of episodes
-    epsilon = 0.01
+    epsilon = 0.1
     alpha = 0.05
     gamma = 1
     lmda = 0.9
@@ -82,7 +83,7 @@ if __name__ == "__main__":
             delta = R - F_a @ w
             if R == 0:
                 w += alpha*delta*e
-                print(f"Episode number {i_ep}/{I} terminated in {step_counter}")
+                if i_ep % 100 == 0:print(f"Episode number {i_ep}/{I} terminated in {step_counter}")
                 break
             actions_feature = [tile_code(s,action) for action in possible_actions]
             q_values = actions_feature @ w
@@ -93,7 +94,8 @@ if __name__ == "__main__":
             e = gamma*lmda*e
             # if step_counter % 100 == 0: print(w,q_values,delta,e,s,F_a)
 
-    # Save the weights and other necessary values for a 3D surf plot
+
     with open('weights.pkl', 'wb') as f:
         pickle.dump(w, f)
-
+        f.close()
+        print("w saved in weights.pkl")
