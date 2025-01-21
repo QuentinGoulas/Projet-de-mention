@@ -13,13 +13,14 @@ import numpy as np
 # dC : vitesse initiale de la voiture
 # g : gravité
 class PendulumCart():
-    def __init__(self, L=1.0, mP=2.0, mC=10.0, dP=1.0, dC=5.0, g=9.81):
+    def __init__(self, L=1.0, mP=0.0, mC=10.0, dP=1.0, dC=5.0, g=9.81, action_range=10):
         self.L = L
         self.mP = mP
         self.mC = mC
         self.dP = dP
         self.dC = dC
         self.g = g
+        self.action_range = action_range
 
     def _ode(self, X0, t=0,  inputT=0, inputF=0 , interp_F=True):
         x = X0[0]
@@ -27,10 +28,10 @@ class PendulumCart():
         theta = X0[2]
         dtheta = X0[3]
 
-        if interp_F:
+        if interp_F is list:
             F = np.interp(t, inputT, inputF)
         else: F = inputF
-
+        
         s = np.sin(theta)
         c = np.cos(theta)
 
@@ -76,7 +77,8 @@ class PendulumCart():
             X[i, :] = X_curr + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
 
         return X
-    def next_state(self, X_curr, dt, F):
+    def next_state(self, X_curr, dt, idx_action):
+        F = [-5, 5][idx_action]
         # Étapes intermédiaires (RK4)
         k1 = self._ode(X_curr, inputF=F)
         k2 = self._ode(X_curr + dt * k1 / 2, inputF=F)
@@ -84,7 +86,10 @@ class PendulumCart():
         k4 = self._ode(X_curr + dt * k3, inputF=F)
 
         # Mise à jour de l'état
-        return X_curr + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+        next_X = X_curr + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+        # Wrap angle to stay between -pi and pi
+        next_X[2] = ((next_X[2] + np.pi) % (2 * np.pi)) - np.pi
+        return next_X
         
 
 class DrawCart:
